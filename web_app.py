@@ -1,17 +1,20 @@
 """A simple example flask application
 """
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, jsonify, request, render_template, flash, redirect, url_for
 import numpy as np
 from tensorflow.keras.models import load_model
 from tensorflow.keras.backend import clear_session
 import cv2
 import traceback
+import os
+
+UPLOAD_FOLDER = '/uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 clear_session()
 app = Flask(__name__)
-iris_model = None
-mnist_model = None
-
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.secret_key = os.urandom(24)
 
 # def load_iris_model():
 #     global iris_model
@@ -26,9 +29,11 @@ mnist_model = None
 #     mnist_model = load_model(model_file)
 #     mnist_model._make_predict_function()
 
+
 @app.route("/")
 def hello():
     return "Hello World!"
+
 
 @app.route("/json")
 def json_endpoint():
@@ -42,6 +47,7 @@ def example_variable(variable):
     return jsonify({
         "message": f"The variable you entered is {variable}"
     })
+
 
 @app.route("/request-args")
 def example_request_args():
@@ -86,7 +92,7 @@ def example_request_args():
 # @app.route("/iris-ui")
 # def iris_ui():
 #     return render_template("iris.html")
-    
+
 
 # @app.route("/mnist", methods=["POST"])
 # def mnist_predict():
@@ -113,12 +119,32 @@ def example_request_args():
 #             "message": f"An error occurred. {e}"
 #         })
 
-@app.route("/deepfake-ui")
-def mnist_ui():
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route("/deepfake-ui", methods=['POST', 'GET'])
+def deepfake_ui():
+    flash('test')
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        file = request.files['file']
+        # if user does not select file, browser also
+        # submit an empty part without filename
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+        if file and allowed_file(file.filename):
+            filename = file.filename
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            return redirect(url_for('uploaded_file',
+                                    filename=filename))
     return render_template("deepfake.html")
 
 
 if __name__ == '__main__':
-#     load_iris_model()
-#     load_mnist_model()
+    #     load_iris_model()
+    #     load_mnist_model()
     app.run(debug=True)
