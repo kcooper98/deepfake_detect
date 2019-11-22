@@ -124,9 +124,10 @@ def deepfake_ui():
                                     filename=filename))
     return render_template("deepfake.html")
 
-@app.route("/process_image")
-def process_image():
-    return render_template("processed.html")
+@app.route("/process_image/<filename>")
+def process_image(filename):
+    with open('uploads/{}'.format(filename)) as file:
+        return render_template("processed.html")
 
 if __name__ == '__main__':
     app.run(debug=True)
