@@ -1,6 +1,7 @@
 """A simple example flask application
 """
 from flask import Flask, jsonify, request, render_template, flash, redirect, url_for
+from werkzeug.utils import secure_filename
 import numpy as np
 from tensorflow.keras.models import load_model
 from tensorflow.keras.backend import clear_session
@@ -8,7 +9,7 @@ import cv2
 import traceback
 import os
 
-UPLOAD_FOLDER = '/uploads'
+UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 clear_session()
@@ -137,14 +138,12 @@ def deepfake_ui():
             flash('No selected file')
             return redirect(request.url)
         if file and allowed_file(file.filename):
-            filename = file.filename
+            filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            return redirect(url_for('uploaded_file',
+            return redirect(url_for('process_image',
                                     filename=filename))
     return render_template("deepfake.html")
 
 
 if __name__ == '__main__':
-    #     load_iris_model()
-    #     load_mnist_model()
     app.run(debug=True)
