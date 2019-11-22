@@ -30,19 +30,6 @@ app.secret_key = os.urandom(24)
 #     mnist_model = load_model(model_file)
 #     mnist_model._make_predict_function()
 
-
-@app.route("/")
-def hello():
-    return "Hello World!"
-
-
-@app.route("/json")
-def json_endpoint():
-    return jsonify({
-        "message": "Hello World!"
-    })
-
-
 @app.route("/variables/<variable>")
 def example_variable(variable):
     return jsonify({
@@ -89,12 +76,6 @@ def example_request_args():
 #         "species": species
 #     })
 
-
-# @app.route("/iris-ui")
-# def iris_ui():
-#     return render_template("iris.html")
-
-
 # @app.route("/mnist", methods=["POST"])
 # def mnist_predict():
 #     try:
@@ -126,7 +107,6 @@ def allowed_file(filename):
 
 @app.route("/deepfake-ui", methods=['POST', 'GET'])
 def deepfake_ui():
-    flash('test')
     if request.method == 'POST':
         if 'file' not in request.files:
             flash('No file part')
@@ -144,6 +124,9 @@ def deepfake_ui():
                                     filename=filename))
     return render_template("deepfake.html")
 
+@app.route("/process_image")
+def process_image():
+    return render_template("processed.html")
 
 if __name__ == '__main__':
     app.run(debug=True)
