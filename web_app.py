@@ -5,6 +5,7 @@ from werkzeug.utils import secure_filename
 import numpy as np
 from tensorflow.keras.models import load_model
 from tensorflow.keras.backend import clear_session
+from tensorflow.keras.preprocessing import image
 import cv2
 import traceback
 import os
@@ -126,8 +127,8 @@ def deepfake_ui():
 
 @app.route("/process_image/<filename>")
 def process_image(filename):
-    with open('uploads/{}'.format(filename)) as file:
-        return render_template("processed.html")
+    
+    return render_template("output.html")
 
 if __name__ == '__main__':
     app.run(debug=True)
