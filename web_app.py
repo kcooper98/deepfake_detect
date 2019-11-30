@@ -14,7 +14,7 @@ import cv2
 import traceback
 import os
 
-UPLOAD_FOLDER = 'uploads'
+UPLOAD_FOLDER = os.path.join('static', 'uploads')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 clear_session()
@@ -42,36 +42,39 @@ def deepfake_ui():
             flash('No model chosen')
             return redirect(request.url)
         chosen_model = request.form['modelRadios']
+        chosen_model = os.path.join('models', chosen_model)
         if file and allowed_file(file.filename) and chosen_model:
             filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            print(chosen_model, file_path, sep=' || ')
+            file.save(file_path)
             return redirect(url_for('process_image',
-                                    filename=filename,
-                                    model_name=chosen_model))
+                                    file_path=file_path,
+                                    model_path=chosen_model))
     return render_template("deepfake.html")
 
 
-@app.route("/process_image/<filename>/<path:model_name>")
-def process_image(filename, model_name):
+@app.route("/process_image")
+def process_image():
+    file_path = request.args.get('file_path', None)
+    model_path = request.args.get('model_path', None)
     # Load model
-    model_file = 'models\\CNNModel4000Set.h5'
-    selected_model = load_model(model_file)
+    selected_model = load_model(model_path)
 
     # Load and prep image
-    test_image = image.load_img('uploads/{}'.format(filename),
+    test_image = image.load_img(file_path,
                                 target_size=(64, 64))
     test_image = image.img_to_array(test_image)
     test_image = np.expand_dims(test_image, axis=0)
 
     # Predict with model
     result = selected_model.predict(test_image)
-    print(result)
     if result[0][0] == 1:
         prediction = 'fake'
     else:
         prediction = 'real'
 
-    return render_template("output.html", value=prediction)
+    return render_template("output.html", prediction=prediction, image=file_path)
 
 
 if __name__ == '__main__':
