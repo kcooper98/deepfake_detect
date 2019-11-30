@@ -25,12 +25,8 @@ app.secret_key = os.urandom(24)
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-@app.route("/")
-def main_page():
-    return render_template("index.html")
     
-@app.route("/deepfake-ui", methods=['POST', 'GET'])
+@app.route("/", methods=['POST', 'GET'])
 def deepfake_ui():
     if request.method == 'POST':
         if 'file' not in request.files:
@@ -42,16 +38,21 @@ def deepfake_ui():
         if file.filename == '':
             flash('No selected file')
             return redirect(request.url)
-        if file and allowed_file(file.filename):
+        if 'modelRadios' not in request.form:
+            flash('No model chosen')
+            return redirect(request.url)
+        chosen_model = request.form['modelRadios']
+        if file and allowed_file(file.filename) and chosen_model:
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             return redirect(url_for('process_image',
-                                    filename=filename))
+                                    filename=filename,
+                                    model_name=chosen_model))
     return render_template("deepfake.html")
 
 
-@app.route("/process_image/<filename>")
-def process_image(filename):
+@app.route("/process_image/<filename>/<path:model_name>")
+def process_image(filename, model_name):
     # Load model
     model_file = 'models\\CNNModel4000Set.h5'
     selected_model = load_model(model_file)
