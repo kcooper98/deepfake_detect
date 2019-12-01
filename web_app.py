@@ -46,7 +46,6 @@ def deepfake_ui():
         if file and allowed_file(file.filename) and chosen_model:
             filename = secure_filename(file.filename)
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            print(chosen_model, file_path, sep=' || ')
             file.save(file_path)
             return redirect(url_for('process_image',
                                     file_path=file_path,
