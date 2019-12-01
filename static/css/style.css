@@ -8,3 +8,8 @@ body {
 .jumbotron {
     background-color: #ADD8E6;
 }
+
+#result {
+    width: 50%;
+    margin: auto;
+}
