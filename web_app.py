@@ -70,9 +70,9 @@ def process_image():
     # Predict with model
     result = selected_model.predict(test_image)
     if result[0][0] == 1:
-        prediction = 'fake'
-    else:
         prediction = 'real'
+    else:
+        prediction = 'fake'
 
     return render_template("output.html", prediction=prediction, image=file_path)
 
